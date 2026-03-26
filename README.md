@@ -19,10 +19,12 @@ Se diseñó un esquema de discos virtuales separados para proteger la integridad
 
 ## 🛡️ Auditoría y Seguridad DevSecOps
 La infraestructura fue diseñada bajo el principio de "Denegar por defecto" e incluye las siguientes capas de seguridad:
-1. **Hardening de SSH:** Implementación de `Fail2Ban` para bloquear intentos de fuerza bruta en el puerto 22.
-2. **Acceso Remoto Seguro:** Despliegue de un túnel VPN con `WireGuard` (Puerto 51820/UDP) para la administración remota cifrada.
-3. **Aislamiento de Red:** Los contenedores comparten la red del host solo cuando es estrictamente necesario, administrados por interfaces internas de Docker.
-4. **Validación (Penetration Testing):** Se realizó una auditoría básica de puertos utilizando `nmap` (`nmap -sV -p 22,8081,9000...`) para verificar la correcta configuración del firewall UFW, confirmando que servicios internos como Samba (139/445) no están expuestos al exterior.
+1. **Acceso Remoto Seguro:** Despliegue de un túnel VPN con `WireGuard` (Puerto 51820/UDP) para la administración remota cifrada.
+2. **Aislamiento de Red:** Los contenedores comparten la red del host solo cuando es estrictamente necesario, administrados por interfaces internas de Docker.
+3. **Validación (Penetration Testing):** Se realizó una auditoría básica de puertos utilizando `nmap` (`nmap -sV -p 22,8081,9000...`) para verificar la correcta configuración del firewall UFW, confirmando que servicios internos como Samba no están expuestos al exterior.
+
+### 💡 Lecciones Aprendidas (Troubleshooting)
+* **Limitaciones de Kernel con Fail2Ban en Contenedores:** Inicialmente se proyectó desplegar `Fail2Ban` containerizado para proteger el puerto 22. Durante las pruebas, se diagnosticaron conflictos de compatibilidad entre los módulos del Kernel del Host y la capacidad del contenedor (`NET_ADMIN`) para inyectar reglas dinámicas en el enrutamiento. Para no comprometer la estabilidad del sistema, se optó por descartarlo y depender estrictamente del Firewall UFW y la tunelización por WireGuard.
 
 ## 📂 Estructura del Repositorio
 En este repositorio se encuentran los archivos de configuración utilizados para el despliegue de la infraestructura como código:
