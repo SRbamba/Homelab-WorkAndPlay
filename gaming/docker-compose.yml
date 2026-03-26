@@ -1,0 +1,24 @@
+version: "3.7"
+services:
+  #1. Servidor Dedicado de Minecraft (PaperMC)
+  minecraft:
+    image: itzg/minecraft-server:latest
+    container_name: minecraft
+    environment:
+      - EULA=TRUE
+      - MOTD=Servidor Paper - Acceso Libre
+      - TYPE=PAPER
+      - MEMORY=4G # Limita RAM para Paper
+      - ONLINE_MODE=FALSE # Permite acceso a clientes no-premium (Instalar AuthMe!)
+      - MAX_PLAYERS=10
+      - PUID=0 # Necesario para el usuario root de tu VM
+      - PGID=0 # Necesario para el grupo root de tu VM
+    volumes:
+      - ./minecraft/data:/data
+    ports:
+      - "25565:25565"
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 4G
