@@ -1,0 +1,60 @@
+version: "3.7"
+services:
+  ### 1. Portainer (Gestion de contenedor con Interfaz Grafica) ###
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    ports:
+      - "9000:9000"
+    command: -H unix:///var/run/docker.sock
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    restart: unless-stopped
+
+  ### 2. Node Exporter (Monitoreo de Recursos del Host) ###
+  node_exporter:
+    image: prom/node-exporter:latest
+    container_name: node_exporter
+    network_mode: host
+    pid: host
+    restart: unless-stopped
+
+  ### 3. Wireguard (Acceso VPN Seguro) ###
+  wireguard:
+    image: linuxserver/wireguard
+    container_name: wireguard
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    environment:
+      - PUID=0
+      - PGID=0
+      - TZ=America/Argentina/Buenos_Aires
+      - SERVERURL=192.168.128.32
+      - PEERS=1
+      - PEERDNS=auto
+      - INTERNAL_SUBNET=10.10.10.0/24
+    volumes:
+      - ./wireguard/config:/config
+      - /lib/modules:/lib/modules
+    ports:
+      - 51820:51820/udp
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+      - net.ipv4.ip_forward=1
+    restart: unless-stopped
+
+  ### 4. Caddy (Servicio de Proxy Inverso Simple) ###
+  caddy:
+    image: caddy:latest
+    container_name: caddy
+    ports:
+      - "8081:80"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile
+    restart: unless-stopped
+
+### Volumenes Persistentes ###
+volumes:
+  portainer_data:
